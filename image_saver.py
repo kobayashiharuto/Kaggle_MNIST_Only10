@@ -1,13 +1,7 @@
-import os
-from re import A
-from sys import prefix
 from matplotlib import image
 import pandas as pd
 import numpy as np
-import tensorflow as tf
-import matplotlib.pyplot as plt
 from PIL import Image
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 
 
 test_df = pd.read_csv("data/test.csv")
