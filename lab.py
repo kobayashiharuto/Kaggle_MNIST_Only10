@@ -4,27 +4,35 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
+from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization
+
+from tensorflow.keras.models import Sequential
 
 
 # CNN でMNISTを分類するモデルを構築
-model = tf.keras.models.Sequential([
-    Conv2D(64, (5, 5),
-           activation='relu',
-           padding='same',
-           input_shape=(28, 28, 1)
-           ),
+model = Sequential([
+    Conv2D(64, (3, 3), padding='Same',
+           activation='relu', input_shape=(28, 28, 1)),
+    BatchNormalization(),
     MaxPooling2D((3, 3)),
-    Conv2D(128, (3, 3), activation='relu'),
+    Conv2D(128, (3, 3),
+           padding='Same', activation='relu'),
+    BatchNormalization(),
     MaxPooling2D((2, 2)),
-    Dropout(0.5),
-    Conv2D(256, (3, 3), activation='relu'),
-    Dropout(0.5),
+    Dropout(0.3),
+    Conv2D(256, (3, 3),
+           padding='Same', activation='relu'),
+    BatchNormalization(),
+    MaxPooling2D((3, 3)),
+    Dropout(0.3),
     Flatten(),
-    Dense(units=128, activation='relu'),
+    Dense(256, activation="relu"),
+    BatchNormalization(),
+    Dropout(0.3),
+    Dense(256, activation="relu"),
+    BatchNormalization(),
     Dropout(0.5),
-    Dense(units=10, activation='softmax')
+    Dense(10, activation="softmax"),
 ])
-
 
 model.summary()
