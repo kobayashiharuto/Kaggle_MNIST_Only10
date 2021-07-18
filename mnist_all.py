@@ -1,5 +1,5 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from data_controller import get_image_and_labels
 import pandas as pd
 import numpy as np
@@ -93,7 +93,9 @@ history = model.fit(
     validation_data=(test_images, test_labels),
     callbacks=[
         EarlyStopping(monitor='loss', min_delta=0,
-                      patience=30, verbose=1)
+                      patience=15, verbose=1),
+        ReduceLROnPlateau(monitor='loss', patience=3),
+        ModelCheckpoint('models/best_v2.h5', save_best_only=True)
     ],
 )
 
