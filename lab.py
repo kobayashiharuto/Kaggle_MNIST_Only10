@@ -11,30 +11,33 @@ from tensorflow.keras.models import Sequential
 
 # CNN でMNISTを分類するモデルを構築
 model = Sequential([
-    Conv2D(32, (3, 3), padding='Same',
-           activation='relu', input_shape=(28, 28, 1)),
+    Conv2D(64, (3, 3), padding='Same',
+           activation='relu',
+           input_shape=(28, 28, 1),
+           kernel_initializer='he_normal'
+           ),
     BatchNormalization(),
-    Conv2D(32, (3, 3),
-           padding='Same', activation='relu'),
+    Conv2D(64, (3, 3),
+           padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
     Conv2D(64, (3, 3),
-           padding='Same', activation='relu'),
+           padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     Conv2D(64, (3, 3),
-           padding='Same', activation='relu'),
+           padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
     Flatten(),
-    Dense(256, activation="relu"),
+    Dense(256, activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     Dropout(0.3),
-    Dense(256, activation="relu"),
+    Dense(256, activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     Dropout(0.5),
-    Dense(10, activation="softmax"),
+    Dense(10, activation='softmax'),
 ])
 
 model.summary()

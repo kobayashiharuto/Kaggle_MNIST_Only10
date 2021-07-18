@@ -6,7 +6,6 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization
-from sklearn.model_selection import train_test_split
 
 
 # 学習結果をpltで表示
@@ -25,7 +24,7 @@ train_df = pd.read_csv("data/train.csv")
 
 # 訓練用データを読み込む
 train_images, train_labels = get_image_and_labels(
-    path=r'C:\Users\owner\Desktop\Image_tool\image_randomizer\out\mnist_data')
+    path=r'C:\Users\owner\Desktop\Image_tool\image_randomizer\out\mnist_data2')
 train_images = train_images.reshape(train_images.shape + (1,))
 
 # テスト用データを読み込む
@@ -51,33 +50,35 @@ print(test_labels.shape)
 
 # CNN でMNISTを分類するモデルを構築
 model = Sequential([
-    Conv2D(64, (5, 5), padding='Same',
-           activation='relu', input_shape=(28, 28, 1), kernel_initializer='he_normal'),
+    Conv2D(32, (3, 3), padding='Same',
+           activation='relu',
+           input_shape=(28, 28, 1),
+           kernel_initializer='he_normal'
+           ),
     BatchNormalization(),
-    Conv2D(128, (5, 5),
+    Conv2D(32, (3, 3),
            padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
-    Conv2D(128, (3, 3),
+    Conv2D(64, (3, 3),
            padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
-    Conv2D(256, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
-    BatchNormalization(),
-    MaxPooling2D((2, 2)),
-    Dropout(0.3),
-    Conv2D(256, (3, 3),
+    Conv2D(64, (3, 3),
            padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
     Flatten(),
-    Dense(256, activation="relu", kernel_initializer='he_normal'),
+    Dense(256, activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     Dropout(0.3),
-    Dense(10, activation="softmax"),
+    Dense(256, activation='relu', kernel_initializer='he_normal'),
+    BatchNormalization(),
+    Dropout(0.5),
+    Dense(10, activation='softmax'),
 ])
+
 model.summary()
 
 model.compile(
@@ -91,7 +92,8 @@ history = model.fit(
     batch_size=512,
     validation_data=(test_images, test_labels),
     callbacks=[
-        EarlyStopping(min_delta=0.001, patience=10, verbose=1)
+        EarlyStopping(monitor='loss', min_delta=0,
+                      patience=30, verbose=1)
     ],
 )
 
