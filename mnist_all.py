@@ -94,7 +94,11 @@ history = model.fit(
     callbacks=[
         EarlyStopping(monitor='loss', min_delta=0,
                       patience=15, verbose=1),
-        ReduceLROnPlateau(monitor='loss', patience=3),
+        ReduceLROnPlateau(monitor='val_acc',
+                          patience=3,
+                          verbose=1,
+                          factor=0.5,
+                          min_lr=0.00001),
         ModelCheckpoint('models/best_v2.h5', save_best_only=True)
     ],
 )
