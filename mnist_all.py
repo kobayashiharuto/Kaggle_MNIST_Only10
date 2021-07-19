@@ -19,12 +19,11 @@ def show_train_history(train_history, train, validation):
     plt.show()
 
 
-test_df = pd.read_csv("data/test.csv")
 train_df = pd.read_csv("data/train.csv")
 
 # 訓練用データを読み込む
 train_images, train_labels = get_image_and_labels(
-    path=r'C:\Users\owner\Desktop\Image_tool\image_randomizer\out\mnist_data2')
+    path=r'C:\Users\owner\Desktop\Image_tool\image_randomizer\out\mnist_data3')
 train_images = train_images.reshape(train_images.shape + (1,))
 
 # テスト用データを読み込む
@@ -111,15 +110,15 @@ show_train_history(history, 'acc', 'val_acc')
 
 model.save('models/model.h5')
 
-# test_df から、画像を取り出し、numpyの配列に変換
-test_images = test_df.values
-test_images = test_images.astype(np.float)
-test_images = test_images.reshape(test_images.shape[0], 28, 28, 1)
-test_images = test_images / 255
+predict_df = pd.read_csv("data/test.csv")
+predict_images = predict_df.values
+predict_images = predict_images.astype(np.float)
+predict_images = predict_images.reshape(predict_images.shape[0], 28, 28, 1)
+predict_images = predict_images / 255
 
 # test
 model = tf.keras.models.load_model('models/model.h5')
-predict = model.predict(test_images)
+predict = model.predict(predict_images)
 predict = np.argmax(predict, axis=1)
 predict = predict.astype(np.int32)
 
