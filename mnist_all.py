@@ -1,5 +1,6 @@
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.regularizers import L2
 from data_controller import get_image_and_labels
 import pandas as pd
 import numpy as np
@@ -23,7 +24,7 @@ train_df = pd.read_csv("data/train.csv")
 
 # 訓練用データを読み込む
 train_images, train_labels = get_image_and_labels(
-    path=r'C:\Users\owner\Desktop\Image_tool\image_randomizer\out\mnist_data3')
+    path=r'C:\Users\owner\Desktop\Image_tool\image_randomizer\out\mnist_data2')
 train_images = train_images.reshape(train_images.shape + (1,))
 
 # テスト用データを読み込む
@@ -52,31 +53,34 @@ model = Sequential([
     Conv2D(64, (3, 3), padding='Same',
            activation='relu',
            input_shape=(28, 28, 1),
-           kernel_initializer='he_normal'
+           kernel_initializer='he_normal',
+           kernel_regularizer=L2(0.001)
            ),
     Conv2D(64, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
+           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
     BatchNormalization(),
     Conv2D(64, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
+           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
     Conv2D(64, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
+           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
     BatchNormalization(),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
     Conv2D(128, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
+           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
     BatchNormalization(),
     Conv2D(128, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
+           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
     BatchNormalization(),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
     Flatten(),
-    Dense(256, activation='relu', kernel_initializer='he_normal'),
+    Dense(256, activation='relu', kernel_initializer='he_normal',
+          kernel_regularizer=L2(0.001)),
     BatchNormalization(),
     Dropout(0.3),
-    Dense(256, activation='relu', kernel_initializer='he_normal'),
+    Dense(256, activation='relu', kernel_initializer='he_normal',
+          kernel_regularizer=L2(0.001)),
     BatchNormalization(),
     Dropout(0.5),
     Dense(10, activation='softmax'),
