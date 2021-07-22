@@ -1,6 +1,5 @@
-from tensorflow.keras.layers import Conv2D, Dense, BatchNormalization, Activation
-from tensorflow.keras.layers import MaxPool2D, GlobalAveragePooling2D, Add, Layer
-from tensorflow.keras import Model
+from tensorflow.keras.layers import Conv2D, BatchNormalization
+from tensorflow.keras.layers import Add, Layer
 from tensorflow.keras.layers import ReLU
 
 
