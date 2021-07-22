@@ -56,26 +56,32 @@ print(test_images.shape)
 print(test_labels.shape)
 
 # CNN でMNISTを分類するモデルを構築
-input_x = Input((28, 28, 1))
-x = Conv2D(64, (3, 3), padding="same")(input_x)
-x = SEBlock(64)(x)
-x = ResidualBlock(64, 64)(x)
-x = ResidualBlock(64, 64)(x)
-x = Conv2D(128, (3, 3), strides=2, padding="same")(x)
-x = SEBlock(128)(x)
-x = ResidualBlock(128, 128)(x)
-x = ResidualBlock(128, 128)(x)
-x = Conv2D(256, (3, 3), strides=2, padding="same")(x)
-x = MaxPooling2D(2, 2)(x)
-x = SEBlock(256)(x)
-x = GlobalAveragePooling2D()(x)
-x = Dense(128, activation="relu")(x)
-x = Dropout(0.4)(x)
-output_x = Dense(10, activation="softmax")(x)
-
-model = Model(input_x, output_x)
-model.compile(optimizer="adam",
-              loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+model = Sequential([
+    Conv2D(64, (3, 3), padding='same',
+           activation='relu',
+           input_shape=(28, 28, 1),
+           kernel_initializer='he_normal'),
+    SEBlock(64),
+    ResidualBlock(64, 64),
+    ResidualBlock(64, 64),
+    Conv2D(128, (3, 3),
+           padding='same',
+           activation='relu',
+           kernel_initializer='he_normal'),
+    SEBlock(128),
+    ResidualBlock(128, 128),
+    ResidualBlock(128, 128),
+    Conv2D(256, (3, 3),
+           padding='same',
+           activation='relu',
+           kernel_initializer='he_normal'),
+    MaxPooling2D(2, 2),
+    SEBlock(256),
+    GlobalAveragePooling2D(),
+    Dense(128, activation="relu"),
+    Dropout(0.4),
+    Dense(10, activation="softmax")
+])
 model.summary()
 
 model.compile(
@@ -90,13 +96,13 @@ history = model.fit(
     validation_data=(test_images, test_labels),
     callbacks=[
         EarlyStopping(monitor='loss', min_delta=0,
-                      patience=15, verbose=1),
+                      patience=5, verbose=1),
         ReduceLROnPlateau(monitor='val_acc',
                           patience=3,
                           verbose=1,
                           factor=0.5,
                           min_lr=0.00001),
-        ModelCheckpoint('models/best_v3.h5', save_best_only=True)
+        ModelCheckpoint('models/best_v4.h5', save_best_only=True)
     ],
 )
 
