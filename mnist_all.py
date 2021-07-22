@@ -8,6 +8,12 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Concatenate
 from tensorflow.keras.layers import Layer
+from tensorflow.keras import Input
+from tensorflow.python.keras.layers.pooling import GlobalAveragePooling2D
+from data_controller import get_image_and_labels
+from tensorflow.keras import Model
+from module.residual import ResidualBlock
+from module.seblock import se_block
 
 
 # 学習結果をpltで表示
@@ -50,41 +56,26 @@ print(test_images.shape)
 print(test_labels.shape)
 
 # CNN でMNISTを分類するモデルを構築
-model = Sequential([
-    Conv2D(64, (3, 3), padding='Same',
-           activation='relu',
-           input_shape=(28, 28, 1),
-           kernel_initializer='he_normal',
-           ),
-    Conv2D(64, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
-    BatchNormalization(),
-    Conv2D(64, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
-    Conv2D(64, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
-    BatchNormalization(),
-    MaxPooling2D((2, 2)),
-    Dropout(0.3),
-    Conv2D(128, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
-    BatchNormalization(),
-    Conv2D(128, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal'),
-    BatchNormalization(),
-    MaxPooling2D((2, 2)),
-    Dropout(0.3),
-    Flatten(),
-    Dense(256, activation='relu', kernel_initializer='he_normal'),
-    BatchNormalization(),
-    Dropout(0.3),
-    Dense(256, activation='relu', kernel_initializer='he_normal'
-          ),
-    BatchNormalization(),
-    Dropout(0.5),
-    Dense(10, activation='softmax'),
-])
+input_x = Input((28, 28, 1))
+x = Conv2D(64, (3, 3), padding="same")(input_x)
+x = se_block(x, 64)
+x = ResidualBlock(64, 64)(x)
+x = ResidualBlock(64, 64)(x)
+x = Conv2D(128, (3, 3), strides=2, padding="same")(x)
+x = se_block(x, 128)
+x = ResidualBlock(128, 128)(x)
+x = ResidualBlock(128, 128)(x)
+x = Conv2D(256, (3, 3), strides=2, padding="same")(x)
+x = MaxPooling2D(2, 2)(x)
+x = se_block(x, 256)
+x = GlobalAveragePooling2D()(x)
+x = Dense(128, activation="relu")(x)
+x = Dropout(0.4)(x)
+output_x = Dense(10, activation="softmax")(x)
 
+model = Model(input_x, output_x)
+model.compile(optimizer="adam",
+              loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 model.summary()
 
 model.compile(
@@ -95,7 +86,7 @@ model.compile(
 
 history = model.fit(
     train_images, train_labels, epochs=500,
-    batch_size=512,
+    batch_size=128,
     validation_data=(test_images, test_labels),
     callbacks=[
         EarlyStopping(monitor='loss', min_delta=0,
@@ -105,7 +96,7 @@ history = model.fit(
                           verbose=1,
                           factor=0.5,
                           min_lr=0.00001),
-        ModelCheckpoint('models/best_v2.h5', save_best_only=True)
+        ModelCheckpoint('models/best_v3.h5', save_best_only=True)
     ],
 )
 
