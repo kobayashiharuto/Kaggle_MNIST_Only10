@@ -6,7 +6,8 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization
+from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Concatenate
+from tensorflow.keras.layers import Layer
 
 
 # 学習結果をpltで表示
@@ -54,33 +55,31 @@ model = Sequential([
            activation='relu',
            input_shape=(28, 28, 1),
            kernel_initializer='he_normal',
-           kernel_regularizer=L2(0.001)
            ),
     Conv2D(64, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
+           padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     Conv2D(64, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
+           padding='Same', activation='relu', kernel_initializer='he_normal'),
     Conv2D(64, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
+           padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
     Conv2D(128, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
+           padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     Conv2D(128, (3, 3),
-           padding='Same', activation='relu', kernel_initializer='he_normal', kernel_regularizer=L2(0.001)),
+           padding='Same', activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
     Flatten(),
-    Dense(256, activation='relu', kernel_initializer='he_normal',
-          kernel_regularizer=L2(0.001)),
+    Dense(256, activation='relu', kernel_initializer='he_normal'),
     BatchNormalization(),
     Dropout(0.3),
-    Dense(256, activation='relu', kernel_initializer='he_normal',
-          kernel_regularizer=L2(0.001)),
+    Dense(256, activation='relu', kernel_initializer='he_normal'
+          ),
     BatchNormalization(),
     Dropout(0.5),
     Dense(10, activation='softmax'),
@@ -141,3 +140,37 @@ for i in range(64):
     plt.imshow(test_images[i].reshape(28, 28), cmap=plt.cm.binary)
     plt.xlabel(f'{predict[i]}')
 plt.show()
+
+
+class Inception(Layer):
+    def __init__(self, output_filter=64, **kwargs):
+        super(Inception, self).__init__(output_filter, **kwargs)
+
+        self.c1_conv1 = Conv2D(output_filter//4, 1, padding="same")
+        self.c1_conv2 = Conv2D(output_filter//4, 3, padding="same")
+        self.c1_conv3 = Conv2D(output_filter//4, 3, padding="same")
+
+        self.c2_conv1 = Conv2D(output_filter//4, 1, padding="same")
+        self.c2_conv2 = Conv2D(output_filter//4, 3, padding="same")
+
+        self.c3_MaxPool = MaxPooling2D(pool_size=(2, 2), padding="same")
+        self.c3_conv = Conv2D(output_filter//4, 1, padding="same")
+
+        self.c4_conv = Conv2D(output_filter//4, 1, padding="same")
+
+        self.concat = Concatenate()
+
+    def call(self, input_x, training=False):
+        x1 = self.c1_conv1(input_x)
+        x1 = self.c1_conv2(x1)
+        cell1 = self.c1_conv3(x1)
+
+        x2 = self.c2_conv1(input_x)
+        cell2 = self.c2_conv2(x2)
+
+        x2 = self.c3_MaxPool(input_x)
+        cell3 = self.c3_conv(x2)
+
+        cell4 = self.c4_conv(input_x)
+
+        return self.concat([cell1, cell2, cell3, cell4])
