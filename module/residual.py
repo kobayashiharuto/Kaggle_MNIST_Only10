@@ -11,13 +11,19 @@ class ResidualBlock(Layer):
 
         channel = channel_out // 4
 
-        self.conv1 = Conv2D(channel, kernel_size=(1, 1), padding="same")
+        self.conv1 = Conv2D(channel, (1, 1),
+                            padding='same',
+                            kernel_initializer='he_normal')
         self.bn1 = BatchNormalization()
         self.av1 = ReLU()
-        self.conv2 = Conv2D(channel, kernel_size=(3, 3), padding="same")
+        self.conv2 = Conv2D(channel, (3, 3),
+                            padding='same',
+                            kernel_initializer='he_normal')
         self.bn2 = BatchNormalization()
         self.av2 = ReLU()
-        self.conv3 = Conv2D(channel_out, kernel_size=(1, 1), padding="same")
+        self.conv3 = Conv2D(channel_out, (1, 1),
+                            padding='same',
+                            kernel_initializer='he_normal')
         self.bn3 = BatchNormalization()
         self.shortcut = self._shortcut(channel_in, channel_out)
         self.add = Add()
