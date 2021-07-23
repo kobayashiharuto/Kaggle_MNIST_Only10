@@ -9,11 +9,13 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Concatenate, ReLU
 from tensorflow.keras.layers import Layer
 from tensorflow.keras import Input
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.python.keras.layers.pooling import GlobalAveragePooling2D
 from data_controller import get_image_and_labels
 from tensorflow.keras import Model
 from module.residual import ResBlock
 from module.seblock import SEBlock
+from tensorflow.keras.datasets import mnist
 
 
 # 学習結果をpltで表示
@@ -27,35 +29,44 @@ def show_train_history(train_history, train, validation):
     plt.show()
 
 
-train_df = pd.read_csv("data/train.csv")
-
-# 訓練用データを読み込む
-train_images, train_labels = get_image_and_labels(
-    path=r'C:\Users\owner\Desktop\Image_tool\image_randomizer\out\mnist_data2')
-train_images = train_images.reshape(train_images.shape + (1,))
-
-# テスト用データを読み込む
-test_data = pd.read_csv("data/train.csv")
-
-# test_data から、画像とラベルを取り出し、numpyの配列に変換
-test_images = test_data.iloc[:, 1:].values
-test_images = test_images.astype(np.float)
-test_labels = test_data.iloc[:, 0].values
-test_labels = test_labels.astype(np.float)
-
-# CNN で扱えるように次元を変換
-test_images = test_images.reshape(test_images.shape[0], 28, 28, 1)
+# データをロード
+(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
 # 正規化
-test_images = test_images / 255
 train_images = train_images / 255
+test_images = test_images / 255
+
+# CNN で扱えるように次元を変換
+train_images = train_images.reshape(-1, 28, 28, 1)
+test_images = test_images.reshape(-1, 28, 28, 1)
 
 print(train_images.shape)
 print(train_labels.shape)
 print(test_images.shape)
 print(test_labels.shape)
 
-# CNN でMNISTを分類するモデルを構築
+# 画像をランダム化する処理を追加
+image_generater = ImageDataGenerator(
+    featurewise_center=False,  # set input mean to 0 over the dataset
+    samplewise_center=False,  # set each sample mean to 0
+    featurewise_std_normalization=False,  # divide inputs by std of the dataset
+    samplewise_std_normalization=False,  # divide each input by its std
+    zca_whitening=False,  # apply ZCA whitening
+    # randomly rotate images in the range (degrees, 0 to 180)
+    rotation_range=10,
+    zoom_range=0.1,  # Randomly zoom image
+    # randomly shift images horizontally (fraction of total width)
+    width_shift_range=0.1,
+    # randomly shift images vertically (fraction of total height)
+    height_shift_range=0.1,
+    horizontal_flip=False,  # randomly flip images
+    vertical_flip=False
+)
+
+# 訓練用画像にランダム化を適用
+image_generater.fit(train_images)
+
+# モデルを設計
 model = Sequential([
     Conv2D(32, (3, 3), padding='same',
            input_shape=(28, 28, 1),
@@ -85,6 +96,7 @@ model = Sequential([
     Dropout(0.4),
     Dense(10, activation="softmax")
 ])
+
 model.summary()
 
 model.compile(
@@ -94,8 +106,8 @@ model.compile(
 )
 
 history = model.fit(
-    train_images, train_labels, epochs=500,
-    batch_size=128,
+    image_generater.flow(train_images, train_labels, batch_size=128),
+    epochs=500,
     validation_data=(test_images, test_labels),
     callbacks=[
         EarlyStopping(monitor='loss', min_delta=0,
@@ -105,7 +117,7 @@ history = model.fit(
                           verbose=1,
                           factor=0.5,
                           min_lr=0.00001),
-        ModelCheckpoint('models/best_v5.h5', save_best_only=True)
+        ModelCheckpoint('models/best_v6.h5', save_best_only=True)
     ],
 )
 
