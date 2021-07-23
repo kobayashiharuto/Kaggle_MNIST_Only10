@@ -1,6 +1,6 @@
 import pandas as pd
 
-result_csv = pd.read_csv('result/result_9953_v6.csv')
+result_csv = pd.read_csv('result/result_9949_v7.csv')
 results = result_csv['Label'].to_list()
 
 test_csv = pd.read_csv('result/ensemble_result_3.csv')

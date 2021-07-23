@@ -1,6 +1,6 @@
 from tensorflow.keras.layers import Conv2D, BatchNormalization
 from tensorflow.keras.layers import Add, Layer
-from tensorflow.keras.layers import ReLU
+from tensorflow.keras.layers import ReLU, Dropout
 
 
 class ResBlock(Layer):
@@ -79,13 +79,13 @@ class WideResBlock(Layer):
                             kernel_initializer='he_normal')
         self.bn2 = BatchNormalization()
         self.av2 = ReLU()
+        self.dropout = Dropout(0.4)
         self.conv3 = Conv2D(channel_out, (1, 1),
                             padding='same',
                             kernel_initializer='he_normal')
         self.bn3 = BatchNormalization()
         self.shortcut = self._shortcut(channel_in, channel_out)
         self.add = Add()
-        self.av3 = ReLU()
 
     def call(self, input):
         x = self.conv1(input)

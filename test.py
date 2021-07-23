@@ -28,7 +28,7 @@ test_images = test_images / 255
 
 # test
 model = tf.keras.models.load_model(
-    'models/best_v7.h5', custom_objects={'SEBlock': SEBlock, 'ResBlock': ResBlock})
+    'models/best_v8.h5', custom_objects={'SEBlock': SEBlock, 'ResBlock': ResBlock})
 predict = model.predict(test_images)
 predict = np.argmax(predict, axis=1)
 predict = predict.astype(np.int32)
