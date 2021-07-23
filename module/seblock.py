@@ -5,7 +5,7 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2
 
 
 class SEBlock(Layer):
-    def __init__(self, channels, rate=8):
+    def __init__(self, channels, rate=8, name=None, **kwargs):
         super().__init__()
         self.channels = channels
         self.rate = rate

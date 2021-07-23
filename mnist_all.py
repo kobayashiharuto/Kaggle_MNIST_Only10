@@ -137,37 +137,3 @@ for i in range(64):
     plt.imshow(test_images[i].reshape(28, 28), cmap=plt.cm.binary)
     plt.xlabel(f'{predict[i]}')
 plt.show()
-
-
-class Inception(Layer):
-    def __init__(self, output_filter=64, **kwargs):
-        super(Inception, self).__init__(output_filter, **kwargs)
-
-        self.c1_conv1 = Conv2D(output_filter//4, 1, padding="same")
-        self.c1_conv2 = Conv2D(output_filter//4, 3, padding="same")
-        self.c1_conv3 = Conv2D(output_filter//4, 3, padding="same")
-
-        self.c2_conv1 = Conv2D(output_filter//4, 1, padding="same")
-        self.c2_conv2 = Conv2D(output_filter//4, 3, padding="same")
-
-        self.c3_MaxPool = MaxPooling2D(pool_size=(2, 2), padding="same")
-        self.c3_conv = Conv2D(output_filter//4, 1, padding="same")
-
-        self.c4_conv = Conv2D(output_filter//4, 1, padding="same")
-
-        self.concat = Concatenate()
-
-    def call(self, input_x, training=False):
-        x1 = self.c1_conv1(input_x)
-        x1 = self.c1_conv2(x1)
-        cell1 = self.c1_conv3(x1)
-
-        x2 = self.c2_conv1(input_x)
-        cell2 = self.c2_conv2(x2)
-
-        x2 = self.c3_MaxPool(input_x)
-        cell3 = self.c3_conv(x2)
-
-        cell4 = self.c4_conv(input_x)
-
-        return self.concat([cell1, cell2, cell3, cell4])

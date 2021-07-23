@@ -4,7 +4,7 @@ from tensorflow.keras.layers import ReLU
 
 
 class ResidualBlock(Layer):
-    def __init__(self, channel_in=64, channel_out=256):
+    def __init__(self, channel_in=64, channel_out=256, name=None, **kwargs):
         super().__init__()
         self.channel_in = channel_in
         self.channel_out = channel_out
@@ -30,18 +30,18 @@ class ResidualBlock(Layer):
         self.av3 = ReLU()
 
     def call(self, x):
-        h = self.conv1(x)
-        h = self.bn1(h)
-        h = self.av1(h)
-        h = self.conv2(h)
-        h = self.bn2(h)
-        h = self.av2(h)
-        h = self.conv3(h)
-        h = self.bn3(h)
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.av1(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.av2(x)
+        x = self.conv3(x)
+        x = self.bn3(x)
         shortcut = self.shortcut(x)
-        h = self.add([h, shortcut])
-        y = self.av3(h)
-        return y
+        x = self.add([x, shortcut])
+        x = self.av3(x)
+        return x
 
     def get_config(self):
         config = super().get_config().copy()
