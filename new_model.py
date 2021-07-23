@@ -11,19 +11,19 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Concatenate
 from tensorflow.keras.layers import Layer
 from tensorflow.keras import Model
-from module.residual import ResidualBlock
+from module.residual import ResBlock
 from module.seblock import se_block
 
 
 input_x = Input((28, 28, 1))
 x = Conv2D(64, (3, 3), padding="same")(input_x)
 x = se_block(x, 64)
-x = ResidualBlock(64, 64)(x)
-x = ResidualBlock(64, 64)(x)
+x = ResBlock(64, 64)(x)
+x = ResBlock(64, 64)(x)
 x = Conv2D(128, (3, 3), strides=2, padding="same")(x)
 x = se_block(x, 128)
-x = ResidualBlock(128, 128)(x)
-x = ResidualBlock(128, 128)(x)
+x = ResBlock(128, 128)(x)
+x = ResBlock(128, 128)(x)
 x = Conv2D(256, (3, 3), strides=2, padding="same")(x)
 x = MaxPooling2D(2, 2)(x)
 x = se_block(x, 256)

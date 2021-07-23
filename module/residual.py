@@ -3,7 +3,7 @@ from tensorflow.keras.layers import Add, Layer
 from tensorflow.keras.layers import ReLU
 
 
-class ResidualBlock(Layer):
+class ResBlock(Layer):
     def __init__(self, channel_in=64, channel_out=256, name=None, **kwargs):
         super().__init__()
         self.channel_in = channel_in

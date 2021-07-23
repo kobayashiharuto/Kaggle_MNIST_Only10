@@ -12,7 +12,7 @@ from tensorflow.keras import Input
 from tensorflow.python.keras.layers.pooling import GlobalAveragePooling2D
 from data_controller import get_image_and_labels
 from tensorflow.keras import Model
-from module.residual import ResidualBlock
+from module.residual import ResBlock
 from module.seblock import SEBlock
 
 
@@ -62,15 +62,15 @@ model = Sequential([
            input_shape=(28, 28, 1),
            kernel_initializer='he_normal'),
     SEBlock(64),
-    ResidualBlock(64, 64),
-    ResidualBlock(64, 64),
+    ResBlock(64, 64),
+    ResBlock(64, 64),
     Conv2D(128, (3, 3),
            padding='same',
            activation='relu',
            kernel_initializer='he_normal'),
     SEBlock(128),
-    ResidualBlock(128, 128),
-    ResidualBlock(128, 128),
+    ResBlock(128, 128),
+    ResBlock(128, 128),
     Conv2D(256, (3, 3),
            padding='same',
            activation='relu',
@@ -127,13 +127,3 @@ predict_df = pd.DataFrame(
     {"ImageId": range(1, len(predict)+1), "Label": predict})
 predict_df.to_csv("result/result.csv", index=False)
 
-# 結果を64枚一覧で表示
-plt.figure(figsize=(10, 10))
-for i in range(64):
-    plt.subplot(8, 8, i+1)
-    plt.xticks([])
-    plt.yticks([])
-    plt.grid(False)
-    plt.imshow(test_images[i].reshape(28, 28), cmap=plt.cm.binary)
-    plt.xlabel(f'{predict[i]}')
-plt.show()
