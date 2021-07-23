@@ -17,7 +17,7 @@ def image_load():
     train_images, test_images, train_labels, test_labels =\
         train_test_split(images, labels, test_size=0.1)
 
-    return train_images, test_images, train_labels, test_labels
+    return train_images, train_labels, test_images, test_labels
 
 
 def target_data_load():

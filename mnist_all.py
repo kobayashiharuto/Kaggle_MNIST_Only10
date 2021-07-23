@@ -1,21 +1,14 @@
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-from tensorflow.keras.regularizers import L2
-from data_controller import get_image_and_labels
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Concatenate, ReLU
-from tensorflow.keras.layers import Layer
-from tensorflow.keras import Input
+from tensorflow.keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, BatchNormalization, Concatenate, ReLU
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.python.keras.layers.pooling import GlobalAveragePooling2D
-from data_controller import get_image_and_labels
-from tensorflow.keras import Model
 from module.residual import ResBlock
 from module.seblock import SEBlock
-from tensorflow.keras.datasets import mnist
 from image_loader import image_load, target_data_load
 
 
@@ -38,8 +31,8 @@ train_images = train_images / 255
 test_images = test_images / 255
 
 # CNN で扱えるように次元を変換
-train_images = train_images.reshape(-1, 28, 28, 1)
-test_images = test_images.reshape(-1, 28, 28, 1)
+train_images = train_images.reshape(train_images.shape[0], 28, 28, 1)
+test_images = test_images.reshape(test_images.shape[0], 28, 28, 1)
 
 print(train_images.shape)
 print(train_labels.shape)
@@ -128,7 +121,7 @@ model.save('models/model.h5')
 # 推論対象をロードする
 target_images = target_data_load()
 target_images = target_images / 255
-target_images = target_images.reshape(-1, 28, 28, 1)
+target_images = target_images.reshape(target_images[0].shape, 28, 28, 1)
 
 # 推論
 model = tf.keras.models.load_model(
