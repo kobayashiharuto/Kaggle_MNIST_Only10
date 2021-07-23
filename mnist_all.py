@@ -16,6 +16,7 @@ from tensorflow.keras import Model
 from module.residual import ResBlock
 from module.seblock import SEBlock
 from tensorflow.keras.datasets import mnist
+from image_loader import image_load, target_data_load
 
 
 # 学習結果をpltで表示
@@ -30,7 +31,7 @@ def show_train_history(train_history, train, validation):
 
 
 # データをロード
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+train_images, train_labels, test_images, test_labels = image_load()
 
 # 正規化
 train_images = train_images / 255
@@ -47,19 +48,16 @@ print(test_labels.shape)
 
 # 画像をランダム化する処理を追加
 image_generater = ImageDataGenerator(
-    featurewise_center=False,  # set input mean to 0 over the dataset
-    samplewise_center=False,  # set each sample mean to 0
-    featurewise_std_normalization=False,  # divide inputs by std of the dataset
-    samplewise_std_normalization=False,  # divide each input by its std
-    zca_whitening=False,  # apply ZCA whitening
-    # randomly rotate images in the range (degrees, 0 to 180)
+    featurewise_center=False,
+    samplewise_center=False,
+    featurewise_std_normalization=False,
+    samplewise_std_normalization=False,
+    zca_whitening=False,
     rotation_range=10,
-    zoom_range=0.1,  # Randomly zoom image
-    # randomly shift images horizontally (fraction of total width)
+    zoom_range=0.1,
     width_shift_range=0.1,
-    # randomly shift images vertically (fraction of total height)
     height_shift_range=0.1,
-    horizontal_flip=False,  # randomly flip images
+    horizontal_flip=False,
     vertical_flip=False
 )
 
@@ -77,6 +75,7 @@ model = Sequential([
     MaxPooling2D(2, 2),
     Dropout(0.3),
     ResBlock(64, 128),
+    ResBlock(128, 128),
     MaxPooling2D(2, 2),
     Dropout(0.3),
     Conv2D(128, (3, 3), padding='same', activation='relu',
@@ -87,6 +86,10 @@ model = Sequential([
     SEBlock(128),
     MaxPooling2D(2, 2),
     Dropout(0.3),
+    ResBlock(128, 128),
+    ResBlock(128, 128),
+    MaxPooling2D(2, 2),
+    Dropout(0.3),
     GlobalAveragePooling2D(),
     Dense(128, activation="relu"),
     Dropout(0.4),
@@ -94,7 +97,6 @@ model = Sequential([
     Dropout(0.4),
     Dense(10, activation="softmax")
 ])
-
 model.summary()
 
 model.compile(
@@ -123,16 +125,15 @@ show_train_history(history, 'acc', 'val_acc')
 
 model.save('models/model.h5')
 
-predict_df = pd.read_csv("data/test.csv")
-predict_images = predict_df.values
-predict_images = predict_images.astype(np.float)
-predict_images = predict_images.reshape(predict_images.shape[0], 28, 28, 1)
-predict_images = predict_images / 255
+# 推論対象をロードする
+target_images = target_data_load()
+target_images = target_images / 255
+target_images = target_images.reshape(-1, 28, 28, 1)
 
-# test
+# 推論
 model = tf.keras.models.load_model(
     'models/best_v7.h5', custom_objects={'SEBlock': SEBlock, 'ResBlock': ResBlock})
-predict = model.predict(predict_images)
+predict = model.predict(target_images)
 predict = np.argmax(predict, axis=1)
 predict = predict.astype(np.int32)
 
@@ -140,7 +141,6 @@ predict = predict.astype(np.int32)
 predict_df = pd.DataFrame(
     {"ImageId": range(1, len(predict)+1), "Label": predict})
 predict_df.to_csv("result/result.csv", index=False)
-
 
 # 結果を64枚一覧で表示
 plt.figure(figsize=(10, 10))
