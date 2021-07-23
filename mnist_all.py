@@ -68,26 +68,24 @@ image_generater.fit(train_images)
 
 # モデルを設計
 model = Sequential([
-    Conv2D(32, (3, 3), padding='same',
+    Conv2D(64, (3, 3), padding='same', activation='relu',
            input_shape=(28, 28, 1),
            kernel_initializer='he_normal'),
-    BatchNormalization(),
-    ReLU(),
-    SEBlock(32),
+    Conv2D(64, (3, 3), padding='same', activation='relu',
+           kernel_initializer='he_normal'),
+    SEBlock(64),
     MaxPooling2D(2, 2),
     Dropout(0.3),
-    ResBlock(64, 64),
+    ResBlock(64, 128),
     MaxPooling2D(2, 2),
     Dropout(0.3),
-    ResBlock(64, 64),
-    MaxPooling2D(),
-    Dropout(0.3),
-    Conv2D(128, (3, 3), padding='same',
+    Conv2D(128, (3, 3), padding='same', activation='relu',
            input_shape=(28, 28, 1),
            kernel_initializer='he_normal'),
-    BatchNormalization(),
-    ReLU(),
+    Conv2D(128, (3, 3), padding='same',  activation='relu',
+           kernel_initializer='he_normal'),
     SEBlock(128),
+    MaxPooling2D(2, 2),
     Dropout(0.3),
     GlobalAveragePooling2D(),
     Dense(128, activation="relu"),
@@ -117,7 +115,7 @@ history = model.fit(
                           verbose=1,
                           factor=0.5,
                           min_lr=0.00001),
-        ModelCheckpoint('models/best_v6.h5', save_best_only=True)
+        ModelCheckpoint('models/best_v7.h5', save_best_only=True)
     ],
 )
 
@@ -133,7 +131,7 @@ predict_images = predict_images / 255
 
 # test
 model = tf.keras.models.load_model(
-    'models/best_v5.h5', custom_objects={'SEBlock': SEBlock, 'ResBlock': ResBlock})
+    'models/best_v7.h5', custom_objects={'SEBlock': SEBlock, 'ResBlock': ResBlock})
 predict = model.predict(predict_images)
 predict = np.argmax(predict, axis=1)
 predict = predict.astype(np.int32)

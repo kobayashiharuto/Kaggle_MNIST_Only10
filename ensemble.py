@@ -7,17 +7,14 @@ result1 = result1['Label'].to_list()
 result2 = pd.read_csv('result/result_9944.csv')
 result2 = result2['Label'].to_list()
 
-result3 = pd.read_csv('result/result_9807_v5.csv')
+result3 = pd.read_csv('result/result_9953_v6.csv')
 result3 = result3['Label'].to_list()
-
-result4 = pd.read_csv('result/result_9953_v6.csv')
-result4 = result4['Label'].to_list()
 
 acc = 0
 results = []
-for index, (a, b, c, d) in enumerate(zip(result1, result2, result3, result4)):
-    x = statistics.mode([a, b, c, d])
+for index, (a, b, c) in enumerate(zip(result1, result2, result3)):
+    x = statistics.mode([a, b, c])
     results.append([index + 1, x])
 
 df = pd.DataFrame(results, columns=['ImageId', 'Label'])
-df.to_csv('result/ensemble_result_3.csv', index=False)
+df.to_csv('result/ensemble_result_v3.csv', index=False)

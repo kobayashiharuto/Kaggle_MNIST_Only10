@@ -1,9 +1,9 @@
 import pandas as pd
 
-result_csv = pd.read_csv('result/result_9946.csv')
+result_csv = pd.read_csv('result/result_9953_v6.csv')
 results = result_csv['Label'].to_list()
 
-test_csv = pd.read_csv('result/ensemble_result_2.csv')
+test_csv = pd.read_csv('result/ensemble_result_3.csv')
 tests = test_csv['Label'].to_list()
 
 acc = 0
