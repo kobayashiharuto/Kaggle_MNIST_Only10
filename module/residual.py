@@ -80,10 +80,12 @@ class WideResBlock(Layer):
         self.bn2 = BatchNormalization()
         self.av2 = ReLU()
         self.dropout = Dropout(0.4)
-        self.conv3 = Conv2D(channel_out, (1, 1),
+        self.conv3 = Conv2D(channel, (3, 3),
                             padding='same',
                             kernel_initializer='he_normal')
-        self.bn3 = BatchNormalization()
+        self.conv4 = Conv2D(channel_out, (1, 1),
+                            padding='same',
+                            kernel_initializer='he_normal')
         self.shortcut = self._shortcut(channel_in, channel_out)
         self.add = Add()
 
@@ -94,11 +96,11 @@ class WideResBlock(Layer):
         x = self.conv2(x)
         x = self.bn2(x)
         x = self.av2(x)
+        x = self.dropout(x)
         x = self.conv3(x)
-        x = self.bn3(x)
+        x = self.conv4(x)
         shortcut = self.shortcut(x)
         x = self.add([x, shortcut])
-        x = self.av3(x)
         return x
 
     def get_config(self):

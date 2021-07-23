@@ -59,26 +59,38 @@ image_generater.fit(train_images)
 
 # モデルを設計
 model = Sequential([
-    Conv2D(64, (3, 3), padding='same', activation='relu',
+    Conv2D(128, (3, 3), padding='same', activation='relu',
            input_shape=(28, 28, 1),
            kernel_initializer='he_normal'),
-    Conv2D(64, (3, 3), activation='relu',
-           kernel_initializer='he_normal'),
-    SEBlock(64),
-    MaxPooling2D(2, 2),
+    SEBlock(128),
+    BatchNormalization(),
     Dropout(0.3),
-    ResBlock(64, 128),
-    ResBlock(128, 128),
-    MaxPooling2D(2, 2),
-    Dropout(0.3),
-    Conv2D(128, (3, 3), activation='relu',
-           input_shape=(28, 28, 1),
-           kernel_initializer='he_normal'),
     Conv2D(128, (3, 3), activation='relu',
            kernel_initializer='he_normal'),
     SEBlock(128),
+    BatchNormalization(),
+    Dropout(0.3),
+    ResBlock(128, 128),
+    ResBlock(128, 128),
     MaxPooling2D(2, 2),
     Dropout(0.3),
+    Conv2D(256, (3, 3), activation='relu',
+           input_shape=(28, 28, 1),
+           kernel_initializer='he_normal'),
+    SEBlock(256),
+    BatchNormalization(),
+    Dropout(0.3),
+    ResBlock(256, 256),
+    ResBlock(256, 256),
+    MaxPooling2D(2, 2),
+    Dropout(0.3),
+    Conv2D(256, (3, 3), activation='relu',
+           kernel_initializer='he_normal'),
+    SEBlock(256),
+    BatchNormalization(),
+    Dropout(0.3),
+    ResBlock(256, 256),
+    ResBlock(256, 256),
     GlobalAveragePooling2D(),
     Dense(128, kernel_initializer='he_normal', activation="relu"),
     Dropout(0.4),
@@ -86,10 +98,11 @@ model = Sequential([
     Dropout(0.4),
     Dense(10, activation="softmax")
 ])
+
 model.summary()
 
 model.compile(
-    optimizer=tf.keras.optimizers.Adam(lr=0.003),
+    optimizer=tf.keras.optimizers.RMSprop(lr=0.01),
     loss='sparse_categorical_crossentropy',
     metrics=['acc']
 )
@@ -106,7 +119,7 @@ history = model.fit(
                           verbose=1,
                           factor=0.5,
                           min_lr=0.00001),
-        ModelCheckpoint('models/best_v8.h5', save_best_only=True)
+        ModelCheckpoint('models/best_v9.h5', save_best_only=True)
     ],
 )
 
