@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Concatenate
+from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Concatenate, ReLU
 from tensorflow.keras.layers import Layer
 from tensorflow.keras import Input
 from tensorflow.python.keras.layers.pooling import GlobalAveragePooling2D
@@ -57,28 +57,31 @@ print(test_labels.shape)
 
 # CNN でMNISTを分類するモデルを構築
 model = Sequential([
-    Conv2D(64, (3, 3), padding='same',
-           activation='relu',
+    Conv2D(16, (3, 3), padding='same',
            input_shape=(28, 28, 1),
            kernel_initializer='he_normal'),
-    SEBlock(64),
-    ResBlock(64, 64),
-    ResBlock(64, 64),
-    Conv2D(128, (3, 3),
-           padding='same',
-           activation='relu',
-           kernel_initializer='he_normal'),
-    SEBlock(128),
-    ResBlock(128, 128),
-    ResBlock(128, 128),
-    Conv2D(256, (3, 3),
+    BatchNormalization(),
+    ReLU(),
+    SEBlock(16),
+    MaxPooling2D(2, 2),
+    Dropout(0.3),
+    ResBlock(32, 32),
+    MaxPooling2D(2, 2),
+    Dropout(0.3),
+    ResBlock(32, 64),
+    MaxPooling2D(),
+    Dropout(0.3),
+    Conv2D(64, (3, 3),
            padding='same',
            activation='relu',
            kernel_initializer='he_normal'),
     MaxPooling2D(2, 2),
-    SEBlock(256),
+    SEBlock(64),
+    Dropout(0.4),
     GlobalAveragePooling2D(),
     Dense(128, activation="relu"),
+    Dropout(0.4),
+    Dense(256, activation="relu"),
     Dropout(0.4),
     Dense(10, activation="softmax")
 ])
@@ -102,7 +105,7 @@ history = model.fit(
                           verbose=1,
                           factor=0.5,
                           min_lr=0.00001),
-        ModelCheckpoint('models/best_v4.h5', save_best_only=True)
+        ModelCheckpoint('models/best_v5.h5', save_best_only=True)
     ],
 )
 
@@ -117,7 +120,8 @@ predict_images = predict_images.reshape(predict_images.shape[0], 28, 28, 1)
 predict_images = predict_images / 255
 
 # test
-model = tf.keras.models.load_model('models/model.h5')
+model = tf.keras.models.load_model(
+    'models/best_v5.h5', custom_objects={'SEBlock': SEBlock, 'ResBlock': ResBlock})
 predict = model.predict(predict_images)
 predict = np.argmax(predict, axis=1)
 predict = predict.astype(np.int32)
@@ -127,3 +131,14 @@ predict_df = pd.DataFrame(
     {"ImageId": range(1, len(predict)+1), "Label": predict})
 predict_df.to_csv("result/result.csv", index=False)
 
+
+# 結果を64枚一覧で表示
+plt.figure(figsize=(10, 10))
+for i in range(64):
+    plt.subplot(8, 8, i+1)
+    plt.xticks([])
+    plt.yticks([])
+    plt.grid(False)
+    plt.imshow(test_images[i].reshape(28, 28), cmap=plt.cm.binary)
+    plt.xlabel(f'{predict[i]}')
+plt.show()

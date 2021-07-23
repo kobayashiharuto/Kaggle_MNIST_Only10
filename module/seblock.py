@@ -1,7 +1,5 @@
-from tensorflow.keras.layers import ReLU
-from tensorflow.keras.layers import Add, Layer
-from tensorflow.keras.layers import Conv2D, BatchNormalization
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Concatenate, GlobalAveragePooling2D, Multiply
+from tensorflow.keras.layers import Layer
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Multiply
 
 
 class SEBlock(Layer):
