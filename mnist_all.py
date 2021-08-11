@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, BatchNormalization, Concatenate, ReLU
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.python.keras.layers.pooling import GlobalAveragePooling2D
-from module.residual import ResBlock
+from module.residual import ResBlock, WideResBlock
 from module.seblock import SEBlock
 from image_loader import image_load, target_data_load
 
@@ -59,10 +59,10 @@ image_generater.fit(train_images)
 
 # モデルを設計
 model = Sequential([
-    Conv2D(128, (3, 3), padding='same', activation='relu',
+    Conv2D(64, (3, 3), padding='same', activation='relu',
            input_shape=(28, 28, 1),
            kernel_initializer='he_normal'),
-    SEBlock(128),
+    SEBlock(64),
     BatchNormalization(),
     Dropout(0.3),
     Conv2D(128, (3, 3), activation='relu',
@@ -92,9 +92,9 @@ model = Sequential([
     ResBlock(256, 256),
     ResBlock(256, 256),
     GlobalAveragePooling2D(),
-    Dense(128, kernel_initializer='he_normal', activation="relu"),
-    Dropout(0.4),
     Dense(256, kernel_initializer='he_normal', activation="relu"),
+    Dropout(0.4),
+    Dense(512, kernel_initializer='he_normal', activation="relu"),
     Dropout(0.4),
     Dense(10, activation="softmax")
 ])
@@ -102,7 +102,7 @@ model = Sequential([
 model.summary()
 
 model.compile(
-    optimizer=tf.keras.optimizers.RMSprop(lr=0.01),
+    optimizer=tf.keras.optimizers.RMSprop(lr=0.0008),
     loss='sparse_categorical_crossentropy',
     metrics=['acc']
 )
@@ -113,13 +113,13 @@ history = model.fit(
     validation_data=(test_images, test_labels),
     callbacks=[
         EarlyStopping(monitor='loss', min_delta=0,
-                      patience=10, verbose=1),
+                      patience=20, verbose=1),
         ReduceLROnPlateau(monitor='val_acc',
                           patience=3,
                           verbose=1,
                           factor=0.5,
                           min_lr=0.00001),
-        ModelCheckpoint('models/best_v9.h5', save_best_only=True)
+        ModelCheckpoint('models/best_v10.h5', save_best_only=True)
     ],
 )
 
@@ -134,7 +134,7 @@ target_images = target_images.reshape(target_images[0].shape, 28, 28, 1)
 
 # 推論
 model = tf.keras.models.load_model(
-    'models/best_v8.h5', custom_objects={'SEBlock': SEBlock, 'ResBlock': ResBlock})
+    'models/best_v10.h5', custom_objects={'SEBlock': SEBlock, 'ResBlock': ResBlock})
 predict = model.predict(target_images)
 predict = np.argmax(predict, axis=1)
 predict = predict.astype(np.int32)

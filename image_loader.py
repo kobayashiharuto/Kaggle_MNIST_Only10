@@ -22,9 +22,8 @@ def image_load():
 
 def target_data_load():
     target_data = pd.read_csv("data/test.csv")
-
     # target_data から、画像を取り出し、numpyの配列に変換
-    target_images = target_data.iloc[:, 1:].values
+    target_images = target_data.values
     target_images = target_images.astype(np.float)
 
     return target_images
